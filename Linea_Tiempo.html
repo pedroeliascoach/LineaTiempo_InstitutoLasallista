@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronología Completa del Instituto - La Salle</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel para transpilar JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .transition-all { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-slate-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Componente de Icono simplificado para evitar dependencias complejas
+        const Icon = ({ name, className }) => {
+            return <i data-lucide={name} className={className}></i>;
+        };
+
+        const events = [
+            { id: 1, year: "1680", title: "Fundación del Instituto", description: "San Juan Bautista de La Salle y sus primeros maestros fundan la comunidad de laicos bajo el nombre de Hermanos de las Escuelas Cristianas.", category: "Orígenes", icon: "star", details: "Un movimiento para dar educación humana y cristiana a los hijos de artesanos y pobres." },
+            { id: 2, year: "1725", title: "Aprobación Pontificia", description: "Aprobación oficial del Instituto por parte de la Iglesia, garantizando su estabilidad tras la muerte del Fundador.", category: "Orígenes", icon: "shield-check", details: "Se produce la aprobación oficial del Instituto por parte de la Iglesia en este año." },
+            { id: 3, year: "1777-1798", title: "Hno. Agathon: Consolidación", description: "Gran Superior que crea los escolasticados y publica 'La explicación de las doce virtudes del buen maestro'.", category: "Consolidación", icon: "library", details: "Mejoró la formación de los Hermanos y redactó la Regla de gobierno." },
+            { id: 4, year: "1789", title: "Revolución Francesa", description: "Crisis extrema: cierre de casas y dispersión. El Instituto sobrevive solo en la casa de Orvieto, Italia.", category: "Crisis", icon: "alert-triangle", details: "Los sucesivos decretos obligaron a los Hermanos a la clandestinidad o al exilio." },
+            { id: 5, year: "1802-1838", title: "Restauración", description: "Restablecimiento en Francia bajo la Universidad Imperial. Reconocimiento legal y aumento masivo de vocaciones.", category: "Crecimiento", icon: "history", details: "El Instituto queda encargado de las escuelas primarias de Francia por encargo del Estado." },
+            { id: 6, year: "1838-1875", title: "Difusión Mundial", description: "Expansión global. Primer contacto con el Islam y el Judaísmo en las obras de los Balcanes y el Mediterráneo.", category: "Crecimiento", icon: "globe", details: "Época de industrialización donde el modelo francés se exporta a todo el mundo." },
+            { id: 7, year: "1888", title: "Beatificación del Fundador", description: "Reconocimiento eclesial de la santidad y vida ejemplar de Juan Bautista de La Salle.", category: "Espiritualidad", icon: "award", details: "Un período de gran preocupación por la formación catequística de los Hermanos." },
+            { id: 8, year: "1900", title: "Canonización", description: "Juan Bautista de La Salle es proclamado Santo. Se le reconoce como el patrón de los educadores cristianos.", category: "Espiritualidad", icon: "star", details: "Se produce en un momento de crisis política en Francia pero de gloria espiritual para el Instituto." },
+            { id: 9, year: "1904", title: "Crisis en Francia", description: "Prohibición total de la enseñanza a congregaciones. Detonante de la expansión hacia nuevos países como México.", category: "Crisis", icon: "alert-triangle", details: "Muchos Hermanos se secularizaron o trasladaron colegios a las fronteras." },
+            { id: 10, year: "1905", title: "Llegada a México", description: "Los primeros Hermanos (Jebert, Amédée, Adrien y Antoine) llegan a solicitud del Arzobispo de Morelia.", category: "México", icon: "map-pin", details: "Pusieron su misión bajo la protección de la Virgen de Guadalupe." },
+            { id: 11, year: "1914", title: "Mártires de Zacatecas", description: "Fusilamiento de los Hermanos Adolphe-Francois y Adrien-Marie por las fuerzas villistas en el Cerro de la Bufa.", category: "México", icon: "cross", details: "Fueron acusados falsamente de mezclarse en política y ayudar al gobierno." },
+            { id: 12, year: "1915-1920", title: "Primer Resurgimiento en México", description: "Regreso tras el exilio revolucionario. Apertura del Colegio Francés 'De La Salle' y el Zacatito.", category: "México", icon: "history", details: "El Hno. Berthier y el Hno. Adrias-Bernard lideran la reconstrucción del Distrito." },
+            { id: 13, year: "1934", title: "Período Cardenista", description: "Nacionalización de colegios por el socialismo oficial. La educación continúa clandestinamente en casas particulares.", category: "México", icon: "shield-check", details: "Los grupos anduvieron 'a salto de mata' para no ser descubiertos." },
+            { id: 14, year: "1938-1939", title: "Segunda Restauración", description: "Fundación del Colegio Benavente (Puebla) e Instituto Francés de la Laguna (Torreón).", category: "México", icon: "users", details: "Se incorporan los colegios Cristóbal Colón y Simón Bolívar en la Ciudad de México." },
+            { id: 15, year: "1942-1944", title: "Expansión Nacional", description: "Fundación del Colegio Regiomontano (Monterrey, 1942) y el Febres Cordero (Guadalajara, 1944).", category: "México", icon: "map-pin", details: "El lasallismo se consolida en las ciudades principales de la República." },
+            { id: 16, year: "1946-1948", title: "Nuevas Ramas Lasallistas", description: "Fundación de las Hermanas Guadalupanas en México y unión con los Catequistas de Turín.", category: "Familia", icon: "users", details: "La Familia Lasallista se diversifica para responder a nuevas necesidades." },
+            { id: 17, year: "1966-1967", title: "Capítulo de Renovación", description: "Aggiornamento post-Vaticano II. Opción preferencial por los pobres y actualización de la identidad del Hermano.", category: "Actualidad", icon: "book-open", details: "Labor de renovación y adaptación profunda al mundo moderno." },
+            { id: 18, year: "1987", title: "Aprobación de la Nueva Regla", description: "Consolidación de la labor de renovación tras 20 años de experimentación.", category: "Actualidad", icon: "shield-check", details: "Documento fundamental que rige la vida del Instituto hoy." },
+            { id: 19, year: "1990", title: "Premio NOMA UNESCO", description: "Reconocimiento mundial al Instituto por sus logros en alfabetización y promoción cultural.", category: "Actualidad", icon: "trophy", details: "Premio otorgado en Ginebra al Hno. John Johnston, Superior General." },
+            { id: 20, year: "Actualidad", title: "Misión Global", description: "Presencia en 80 países, organizada en 5 regiones (RELAF, RELAN, RELAL, PARC, RELEM).", category: "Actualidad", icon: "globe", details: "Casi un millón de alumnos y 90,000 colaboradores seglares en Misión Compartida." }
+        ];
+
+        const App = () => {
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [isAnimating, setIsAnimating] = useState(false);
+
+            useEffect(() => {
+                // Inicializar iconos de Lucide
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [currentIndex]);
+
+            const nextEvent = () => {
+                if (isAnimating) return;
+                setIsAnimating(true);
+                setCurrentIndex((prev) => (prev + 1) % events.length);
+                setTimeout(() => setIsAnimating(false), 400);
+            };
+
+            const prevEvent = () => {
+                if (isAnimating) return;
+                setIsAnimating(true);
+                setCurrentIndex((prev) => (prev - 1 + events.length) % events.length);
+                setTimeout(() => setIsAnimating(false), 400);
+            };
+
+            const currentEvent = events[currentIndex];
+
+            const getCategoryColor = (category) => {
+                switch (category) {
+                    case 'Orígenes': return 'bg-[#002B54]';
+                    case 'Consolidación': return 'bg-indigo-800';
+                    case 'Crisis': return 'bg-red-800';
+                    case 'Crecimiento': return 'bg-blue-600';
+                    case 'Espiritualidad': return 'bg-amber-600';
+                    case 'México': return 'bg-emerald-800';
+                    case 'Familia': return 'bg-purple-800';
+                    case 'Actualidad': return 'bg-[#EAAA00]';
+                    default: return 'bg-slate-700';
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-slate-100 flex flex-col">
+                    {/* Header Institucional */}
+                    <header className="bg-[#002B54] text-white p-6 shadow-2xl relative z-30 border-b-4 border-[#EAAA00]">
+                        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-[#EAAA00] p-2.5 rounded-xl shadow-lg transform rotate-2">
+                                    <Icon name="star" className="text-[#002B54] w-8 h-8 fill-current" />
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none">
+                                        Cronología Institucional Lasallista
+                                    </h1>
+                                    <p className="text-xs md:text-sm text-blue-200 font-bold uppercase tracking-[0.2em] mt-1">
+                                        Módulo 6 • El Instituto de los Hermanos de las Escuelas Cristianas • Indivisa Manent
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="hidden md:flex items-center gap-6 border-l border-white/20 pl-6">
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black text-[#EAAA00] uppercase tracking-widest">Antología 2020</p>
+                                    <p className="text-sm font-light text-white/80">Diplomado Formación</p>
+                                </div>
+                                <Icon name="history" className="w-8 h-8 text-white/30" />
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Timeline */}
+                    <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-12 relative">
+                        
+                        {/* Selector de Años (Navigation) */}
+                        <div className="w-full max-w-5xl overflow-x-auto pb-4 no-scrollbar mb-8 flex justify-center">
+                            <div className="flex gap-2 min-w-max px-4">
+                                {events.map((e, i) => (
+                                    <button
+                                        key={e.id}
+                                        onClick={() => {
+                                            setIsAnimating(true);
+                                            setCurrentIndex(i);
+                                            setTimeout(() => setIsAnimating(false), 400);
+                                        }}
+                                        className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-bold transition-all whitespace-nowrap ${
+                                            i === currentIndex 
+                                                ? 'bg-[#002B54] text-white ring-2 ring-[#EAAA00] ring-offset-2 scale-110' 
+                                                : 'bg-white text-slate-500 hover:bg-slate-200'
+                                        }`}
+                                    >
+                                        {e.year}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Interactive Card */}
+                        <div className="relative w-full max-w-5xl group">
+                            <div className={`bg-white rounded-[2.5rem] shadow-[0_35px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden border border-slate-200 transition-all duration-500 transform ${isAnimating ? 'opacity-0 scale-95 translate-y-4' : 'opacity-100 scale-100 translate-y-0'}`}>
+                                <div className="flex flex-col lg:flex-row min-h-[500px]">
+                                    
+                                    {/* Visual Side */}
+                                    <div className={`lg:w-2/5 p-12 flex flex-col items-center justify-center text-white text-center relative transition-colors duration-500 ${getCategoryColor(currentEvent.category)}`}>
+                                        <div className="absolute top-4 left-4 opacity-10 font-black text-6xl select-none">
+                                            {currentIndex + 1}
+                                        </div>
+                                        <span className="text-7xl md:text-8xl font-black mb-6 tracking-tighter drop-shadow-2xl">{currentEvent.year}</span>
+                                        <div className="bg-white/10 p-7 rounded-[2.5rem] backdrop-blur-md mb-8 border border-white/20 shadow-inner">
+                                            <Icon name={currentEvent.icon} className="w-12 h-12" />
+                                        </div>
+                                        <div className="px-6 py-2 bg-black/30 rounded-full text-xs font-black uppercase tracking-[0.3em] border border-white/10">
+                                            {currentEvent.category}
+                                        </div>
+                                    </div>
+
+                                    {/* Content Side */}
+                                    <div className="lg:w-3/5 p-10 md:p-16 flex flex-col justify-center bg-white relative">
+                                        <h2 className="text-3xl md:text-5xl font-extrabold text-[#002B54] mb-8 leading-[1.1] tracking-tight">
+                                            {currentEvent.title}
+                                        </h2>
+                                        <p className="text-xl text-slate-600 mb-10 leading-relaxed font-medium">
+                                            {currentEvent.description}
+                                        </p>
+                                        <div className="p-8 bg-blue-50/50 rounded-[2rem] border-l-8 border-[#EAAA00] relative shadow-inner">
+                                            <div className="absolute -top-4 -left-4 bg-[#EAAA00] p-2 rounded-lg text-[#002B54] shadow-md">
+                                                <Icon name="book-open" className="w-5 h-5" />
+                                            </div>
+                                            <p className="text-md text-slate-700 italic leading-snug">
+                                                "{currentEvent.details}"
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Nav Controls */}
+                            <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-4 md:-px-16 pointer-events-none">
+                                <button onClick={prevEvent} className="pointer-events-auto bg-white p-5 rounded-full shadow-2xl text-[#002B54] hover:bg-[#EAAA00] hover:text-white transition-all transform hover:-translate-x-2 active:scale-90 border border-slate-100">
+                                    <Icon name="chevron-left" className="w-8 h-8" />
+                                </button>
+                                <button onClick={nextEvent} className="pointer-events-auto bg-white p-5 rounded-full shadow-2xl text-[#002B54] hover:bg-[#EAAA00] hover:text-white transition-all transform hover:translate-x-2 active:scale-90 border border-slate-100">
+                                    <Icon name="chevron-right" className="w-8 h-8" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Progress Marker */}
+                        <div className="mt-12 flex flex-col items-center">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Misión Compartida</span>
+                            <div className="flex gap-1.5">
+                                {events.map((_, idx) => (
+                                    <div key={idx} className={`h-1.5 rounded-full transition-all duration-500 ${idx === currentIndex ? 'w-10 bg-[#002B54]' : 'w-1.5 bg-slate-300'}`} />
+                                ))}
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Footer con Regiones */}
+                    <footer className="bg-white border-t border-slate-200 p-6 z-20">
+                        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div className="flex items-center gap-3">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Regiones:</span>
+                                <div className="flex gap-2">
+                                    {['RELAF', 'RELAN', 'RELAL', 'PARC', 'RELEM'].map(r => (
+                                        <span key={r} className={`px-3 py-1 rounded-md text-[10px] font-bold border ${r === 'RELAL' ? 'bg-blue-100 border-blue-300 text-[#002B54]' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
+                                            {r}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="text-center md:text-right">
+                                <p className="text-sm font-bold text-[#002B54]">© 2024 • Universidad La Salle Victoria</p>
+                                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-0.5">Basado exclusivamente en la Antología Módulo 6</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
